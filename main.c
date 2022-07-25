@@ -6,7 +6,7 @@
 
 #define TILECOUNT 3
 
-const char*TILES[TILECOUNT] = {"VOID","WALL","GRASS",};
+const char*TILES[TILECOUNT] = {"VOID","WALL","GRASS","START"};
 
 int lookupReferenceTile(char*tileName) {
     for (int j=0;j<TILECOUNT;j++) {
