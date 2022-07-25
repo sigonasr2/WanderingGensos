@@ -4,6 +4,48 @@
 #include <time.h>
 #include "project/utils/utils.h"
 
+#define TILECOUNT 3
+
+const char*TILES[TILECOUNT] = {"VOID","WALL","GRASS",};
+
+int lookupReferenceTile(char*tileName) {
+    for (int j=0;j<TILECOUNT;j++) {
+        int counter=0;
+        while (TILES[j][counter]!='\0') {
+            if (tileName[counter]!=TILES[j][counter]) {
+                goto next;
+            }
+            counter++;
+        }
+        return j;
+        next:continue;
+    }
+    return -1;
+}
+
+int**LoadWorld(char*filename) {
+    FILE*f=fopen(filename,"r");
+    int refTable[128]={};
+    //Expecting a number then a String. Keep reading until we get a newline, at which point the map data begins.
+    char c;
+    while ((c=fgetc(f))!='\n') {
+        //The next character is the reference character/symbol for the defined obj.
+        char sym=c;
+        c=fgetc(f);
+        //Now we start accumulating a string.
+        int strLength=0;
+        char*str=malloc(strLength);
+        while (c!='\n') {
+            str=realloc(str,++strLength);
+            str[strLength-1]=c;
+            c=fgetc(f);
+        }
+        int refTileNumb=lookupReferenceTile(str);
+        printf("Reference Tile %s identified as %c and refers to slot %d.\n",str,sym,refTileNumb);
+        refTable[sym]=refTileNumb;
+    }
+}
+
 void drawBorder(WINDOW*box) {
     int rows=getmaxy(box)+1;
     int cols=getmaxx(box)+2;
@@ -81,7 +123,9 @@ void drawBackground(int*currentcol,int background_id,int x,int y,int w,int h) {
 }
 
 int main(int argc,char**argv) {
-    int*keyLog=calloc(25,sizeof(int));
+    int**worldData;
+    LoadWorld("maps/start.world");
+    /*int*keyLog=calloc(25,sizeof(int));
     unsigned short currentLogCounter=0;
     unsigned int frameCount = 0;
     int rows,cols;
@@ -168,6 +212,6 @@ int main(int argc,char**argv) {
         }
     }
     free(keyLog);
-    endwin();
+    endwin();*/
     return 0;
 }
