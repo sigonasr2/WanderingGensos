@@ -13,7 +13,11 @@ const char*TILES[TILECOUNT] = {
     /*3*/   "START",
 };
 
-int lookupReferenceTile(char*tileName) {
+enum Tile{
+    VOID,WALL,GRASS,START
+};
+
+char lookupReferenceTile(char*tileName) {
     for (int j=0;j<TILECOUNT;j++) {
         int counter=0;
         while (TILES[j][counter]!='\0') {
@@ -51,7 +55,7 @@ struct Map LoadWorld(char*filename) {
             str[strLength-1]=c;
             c=fgetc(f);
         }
-        int refTileNumb=lookupReferenceTile(str);
+        char refTileNumb=lookupReferenceTile(str);
         printf("Reference Tile %s identified as %c and refers to slot %d.\n",str,sym,refTileNumb);
         refTable[sym]=refTileNumb;
     }
@@ -68,7 +72,7 @@ struct Map LoadWorld(char*filename) {
         while (c!='\n'&&!feof(f)) {
             data[height-1]=realloc(data[height-1],++width);
             data[height-1][width-1]=refTable[c];
-            printf("%c",refTable[c]);
+            printf("%c",c);
             c=fgetc(f);
         }
         printf("\n");
@@ -154,16 +158,16 @@ void drawBackground(int*currentcol,int background_id,int x,int y,int w,int h) {
 }
 
 int main(int argc,char**argv) {
-    int**worldData;
+    /*int**worldData;
     struct Map m = LoadWorld("maps/start.world");
     printf("Map is %dx%d\n",m.width,m.height);
     for (int y=0;y<m.height;y++) {
         for (int x=0;x<m.width;x++) {
-            printf("%c",m.data[y][x]);
+            printf("%d",m.data[y][x]);
         }
         printf("\n");
-    }
-    /*int*keyLog=calloc(25,sizeof(int));
+    }*/
+    int*keyLog=calloc(25,sizeof(int));
     unsigned short currentLogCounter=0;
     unsigned int frameCount = 0;
     int rows,cols;
@@ -250,6 +254,6 @@ int main(int argc,char**argv) {
         }
     }
     free(keyLog);
-    endwin();*/
+    endwin();
     return 0;
 }
