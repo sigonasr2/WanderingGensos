@@ -4,9 +4,14 @@
 #include <time.h>
 #include "project/utils/utils.h"
 
-#define TILECOUNT 3
+#define TILECOUNT 4
 
-const char*TILES[TILECOUNT] = {"VOID","WALL","GRASS","START"};
+const char*TILES[TILECOUNT] = {
+    /*0*/   "VOID",
+    /*1*/   "WALL",
+    /*2*/   "GRASS",
+    /*3*/   "START",
+};
 
 int lookupReferenceTile(char*tileName) {
     for (int j=0;j<TILECOUNT;j++) {
@@ -23,9 +28,15 @@ int lookupReferenceTile(char*tileName) {
     return -1;
 }
 
-int**LoadWorld(char*filename) {
+struct Map {
+    char**data;
+    int width;
+    int height;
+};
+
+struct Map LoadWorld(char*filename) {
     FILE*f=fopen(filename,"r");
-    int refTable[128]={};
+    char refTable[128]={};
     //Expecting a number then a String. Keep reading until we get a newline, at which point the map data begins.
     char c;
     while ((c=fgetc(f))!='\n') {
@@ -44,6 +55,26 @@ int**LoadWorld(char*filename) {
         printf("Reference Tile %s identified as %c and refers to slot %d.\n",str,sym,refTileNumb);
         refTable[sym]=refTileNumb;
     }
+    int height=0;
+    int width=0;
+    char**data=malloc(sizeof(char*)*0);
+    while (!feof(f)) {
+        c=fgetc(f);
+        width=0;
+        data=realloc(data,sizeof(char*)*++height);
+        if (height==1) {
+            data[height-1]=malloc(0);
+        }
+        while (c!='\n'&&!feof(f)) {
+            data[height-1]=realloc(data[height-1],++width);
+            data[height-1][width-1]=refTable[c];
+            printf("%c",refTable[c]);
+            c=fgetc(f);
+        }
+        printf("\n");
+    }
+    printf("\n======================\n\n");
+    return (struct Map){data,width,height};
 }
 
 void drawBorder(WINDOW*box) {
@@ -124,7 +155,14 @@ void drawBackground(int*currentcol,int background_id,int x,int y,int w,int h) {
 
 int main(int argc,char**argv) {
     int**worldData;
-    LoadWorld("maps/start.world");
+    struct Map m = LoadWorld("maps/start.world");
+    printf("Map is %dx%d\n",m.width,m.height);
+    for (int y=0;y<m.height;y++) {
+        for (int x=0;x<m.width;x++) {
+            printf("%c",m.data[y][x]);
+        }
+        printf("\n");
+    }
     /*int*keyLog=calloc(25,sizeof(int));
     unsigned short currentLogCounter=0;
     unsigned int frameCount = 0;
